@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 class DateTimeProvider {
   static String orderCreatedDate(String createdAt) {
-    final formatter = DateFormat('MMMM d');
+    final formatter = DateFormat('dd MMM yyyy');
     final dateTime = DateTime.parse(createdAt).toLocal();
     return formatter.format(dateTime);
   }

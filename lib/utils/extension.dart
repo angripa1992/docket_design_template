@@ -11,6 +11,9 @@ extension NonNullString on String {
       return this;
     }
   }
+  String replacePhp() {
+    return contains("₱") ? replaceAll('₱', 'P') : this;
+  }
 }
 
 extension NonNullInteger on int {

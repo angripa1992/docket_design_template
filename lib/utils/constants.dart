@@ -72,3 +72,10 @@ class Consts {
   static const textWidth = 18;
   static const priceWidth = 12;
 }
+
+class PrinterFontSize {
+  static const int small = 1;
+  static const int normal = 2;
+  static const int large = 3;
+  static const int huge = 4;
+}

@@ -75,10 +75,10 @@ class PriceDetails extends pw.StatelessWidget {
               amount: order.customFee,
               fontSize: fontSize,
             ),
-          if (order.discount > 0)
+          if (order.customerDiscount > 0)
             _getSubtotalItem(
               costName: 'Discount:',
-              amount: order.discount,
+              amount: order.customerDiscount,
               isDiscount: true,
               fontSize: fontSize,
             ),
@@ -89,10 +89,10 @@ class PriceDetails extends pw.StatelessWidget {
               isDiscount: true,
               fontSize: fontSize,
             ),
-          if (order.roundOffAmount != 0 && order.isManualOrder)
+          if (order.roundOffAmount != 0 || order.providerRoundOffAmount != 0)
             _getSubtotalItem(
               costName: 'Rounding Off:',
-              amount: order.roundOffAmount,
+              amount: order.isManualOrder ? order.roundOffAmount : order.providerRoundOffAmount,
               fontSize: fontSize,
               isRoundOff: true,
             ),

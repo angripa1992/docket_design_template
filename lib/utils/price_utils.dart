@@ -16,6 +16,8 @@ class PriceUtil{
       return NumberFormat.currency(locale: 'ID', symbol: currencySymbol,decimalDigits: 0).format(price);
     } else if (name.toUpperCase() == 'JPY') {
       return NumberFormat.currency(locale: 'ja', symbol: currencySymbol, decimalDigits: 0).format(price);
+    } else if (name.toUpperCase() == "PHP") {
+      return NumberFormat.currency(name: name, symbol: 'P', decimalDigits: 2).format(price);
     }
     return NumberFormat.currency(name: name, symbol: currencySymbol, decimalDigits: 2).format(price);
   }

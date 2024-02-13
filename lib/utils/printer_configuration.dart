@@ -1,3 +1,5 @@
+import 'package:sunmi_printer_plus/enums.dart';
+
 import '../model/font_size.dart';
 
 enum Roll {
@@ -73,4 +75,33 @@ SunmiSizeConfig sunmiSizeConfig(Roll roll) {
     tripleColumnCenter: 8,
     tripleColumnRight: 18,
   );
+}
+
+SunmiSizeConfig sunmiSizeConfigFont(Roll roll, SunmiFontSize fontSize) {
+    switch (fontSize) {
+      case SunmiFontSize.SM:
+        return SunmiSizeConfig(
+          left: roll == Roll.mm58? 20: 27,
+          right: roll == Roll.mm58? 20: 27,
+          tripleColumnLeft: 12,
+          tripleColumnCenter: 6,
+          tripleColumnRight: 12,
+        );
+      case SunmiFontSize.LG:
+        return SunmiSizeConfig(
+          left: roll == Roll.mm58? 10: 17,
+          right: roll == Roll.mm58? 10: 17,
+          tripleColumnLeft: 12,
+          tripleColumnCenter: 6,
+          tripleColumnRight: 12,
+        );
+      default:
+        return SunmiSizeConfig(
+          left: roll == Roll.mm58? 15 : 22,
+          right: roll == Roll.mm58? 15 : 22,
+          tripleColumnLeft: 12,
+          tripleColumnCenter: 6,
+          tripleColumnRight: 12,
+        );
+    }
 }

@@ -14,7 +14,7 @@ class TemplateOrder {
   final int itemPrice;
   final int finalPrice;
   final int discount;
- // final int customerDiscount;
+  final int customerDiscount;
   final int deliveryFee;
   final int additionalFee;
   final int gatewayFee;
@@ -57,6 +57,7 @@ class TemplateOrder {
   final num customFee;
   final num mergeFee;
   final num roundOffAmount;
+  final num providerRoundOffAmount;
   final String mergeFeeTitle;
   final bool mergeFeeEnabled;
   final bool gatewayFeePaidByCustomer;
@@ -74,7 +75,7 @@ class TemplateOrder {
     required this.itemPrice,
     required this.finalPrice,
     required this.discount,
-  //  required this.customerDiscount,
+    required this.customerDiscount,
     required this.deliveryFee,
     required this.additionalFee,
     required this.gatewayFee,
@@ -119,6 +120,7 @@ class TemplateOrder {
     required this.mergeFeeTitle,
     required this.mergeFee,
     required this.roundOffAmount,
+    required this.providerRoundOffAmount,
     required this.gatewayFeePaidByCustomer,
     required this.serviceFeePaidByCustomer,
   });
