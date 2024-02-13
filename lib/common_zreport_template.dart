@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:docket_design_template/utils/printer_configuration.dart';
 import 'package:docket_design_template/utils/printer_helper.dart';
-import 'package:esc_pos_utils_plus/esc_pos_utils.dart';
+import 'package:esc_pos_utils/esc_pos_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as im;
 
