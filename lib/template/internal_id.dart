@@ -1,4 +1,6 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:pdf/pdf.dart';
@@ -10,11 +12,10 @@ class InternalID extends pw.StatelessWidget {
   final TemplateOrder order;
   final PrinterFonts fontSize;
 
-  InternalID({ required this.order, required this.fontSize});
+  InternalID({required this.order, required this.fontSize});
 
   @override
   pw.Widget build(pw.Context context) {
-
     final textStyle = pw.TextStyle(
       fontSize: fontSize.regularFontSize,
       color: PdfColors.black,
@@ -28,7 +29,7 @@ class InternalID extends pw.StatelessWidget {
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
           pw.Text(
-            'INTERNAL ID',
+            StringKeys.internal_id.tr(),
             style: textStyle,
           ),
           pw.Text(

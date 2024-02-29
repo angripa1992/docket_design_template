@@ -1,4 +1,6 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/template/docket_separator.dart';
 import 'package:pdf/pdf.dart';
@@ -26,7 +28,7 @@ class DeliveryInfo extends pw.StatelessWidget {
       return 'Delivery';
     } else if (order.type == OrderType.PICKUP) {
       return 'Pickup';
-    }else if (order.type == OrderType.DINE_IN) {
+    } else if (order.type == OrderType.DINE_IN) {
       return 'Dine In';
     } else {
       return 'Manual';
@@ -54,7 +56,7 @@ class DeliveryInfo extends pw.StatelessWidget {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text(
-              '$quantity item${quantity > 1 ? '(s)' : ''}',
+              '$quantity ${StringKeys.item.tr().toLowerCase()}${quantity > 1 ? '(s)' : ''}',
               style: pw.TextStyle(
                 fontSize: fontSize.regularFontSize,
                 color: PdfColors.black,

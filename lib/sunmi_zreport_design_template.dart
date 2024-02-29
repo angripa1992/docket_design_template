@@ -1,5 +1,9 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:docket_design_template/extensions.dart';
+import 'package:docket_design_template/string_keys.dart';
+import 'package:docket_design_template/translator.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
 import 'package:flutter/services.dart';
 import 'package:sunmi_printer_plus/column_maker.dart';
@@ -23,8 +27,9 @@ class SunmiZReportPrinter {
     return result ?? false;
   }
 
-  Future<void> printZReport(TemplateZReport data, Roll roll) async {
+  Future<void> printZReport(TemplateZReport data, Roll roll, Locale locale) async {
     if (!await _bindingPrinter()) return;
+    Translator.setLocale(locale);
     _config = sunmiSizeConfig(roll);
     await SunmiPrinter.initPrinter();
     await SunmiPrinter.startTransactionPrint(true);
@@ -43,7 +48,7 @@ class SunmiZReportPrinter {
 
   Future<void> _printHeader(TemplateZReport data) async {
     await SunmiPrinter.printText(
-      'Z-Report',
+      StringKeys.z_report.tr(),
       style: SunmiStyle(
         align: SunmiPrintAlign.LEFT,
         bold: true,
@@ -59,7 +64,7 @@ class SunmiZReportPrinter {
       ),
     );
     await SunmiPrinter.printText(
-      'Generated Date: ${data.generatedDate}',
+      '${StringKeys.generated_date.tr()}: ${data.generatedDate}',
       style: SunmiStyle(
         align: SunmiPrintAlign.LEFT,
         bold: true,
@@ -69,7 +74,7 @@ class SunmiZReportPrinter {
   }
 
   Future<void> _printSalesSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Sales Summary');
+    await _printSummaryTitle(StringKeys.sales_summary.tr());
     for (var summary in data.salesSummary.summaries) {
       await SunmiPrinter.printRow(
         cols: [
@@ -87,14 +92,14 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total Sales', data.salesSummary.totalSales);
-    await _printTotalSales('Discount', data.salesSummary.discount);
+    await _printTotalSales(StringKeys.total_sales.tr(), data.salesSummary.totalSales);
+    await _printTotalSales(StringKeys.discount.tr(), data.salesSummary.discount);
     await SunmiPrinter.line();
-    await _printTotalSales('Net Sales', data.salesSummary.netSales);
+    await _printTotalSales(StringKeys.net_sales.tr(), data.salesSummary.netSales);
   }
 
   Future<void> _printBrandSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Brand Summary');
+    await _printSummaryTitle(StringKeys.brand_summary.tr());
     for (var summary in data.brandSummary.summaries) {
       await SunmiPrinter.printRow(
         cols: [
@@ -112,29 +117,29 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total Sales', data.brandSummary.totalSales);
-    await _printTotalSales('Discount', data.brandSummary.discount);
+    await _printTotalSales(StringKeys.total_sales.tr(), data.brandSummary.totalSales);
+    await _printTotalSales(StringKeys.discount.tr(), data.brandSummary.discount);
     await SunmiPrinter.line();
-    await _printTotalSales('Net Sales', data.brandSummary.netSales);
+    await _printTotalSales(StringKeys.net_sales.tr(), data.brandSummary.netSales);
   }
 
   Future<void> _printItemsSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Item Summary');
+    await _printSummaryTitle(StringKeys.item_summary.tr());
     await SunmiPrinter.bold();
     await SunmiPrinter.printRow(
       cols: [
         ColumnMaker(
-          text: 'Item',
+          text: StringKeys.item.tr(),
           align: SunmiPrintAlign.LEFT,
           width: _config.tripleColumnLeft,
         ),
         ColumnMaker(
-          text: 'Qty',
+          text: StringKeys.qty.tr(),
           align: SunmiPrintAlign.CENTER,
           width: _config.tripleColumnCenter,
         ),
         ColumnMaker(
-          text: 'Net Sales',
+          text: StringKeys.net_sales.tr(),
           align: SunmiPrintAlign.RIGHT,
           width: _config.tripleColumnRight,
         ),
@@ -164,26 +169,26 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total Sales', data.itemSummary.totalSales);
+    await _printTotalSales(StringKeys.total_sales.tr(), data.itemSummary.totalSales);
   }
 
   Future<void> _printItemsModifierSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Modifier Summary');
+    await _printSummaryTitle(StringKeys.modifier_summary.tr());
     await SunmiPrinter.bold();
     await SunmiPrinter.printRow(
       cols: [
         ColumnMaker(
-          text: 'Modifier',
+          text: StringKeys.modifier.tr(),
           align: SunmiPrintAlign.LEFT,
           width: _config.tripleColumnLeft,
         ),
         ColumnMaker(
-          text: 'Qty',
+          text: StringKeys.qty.tr(),
           align: SunmiPrintAlign.CENTER,
           width: _config.tripleColumnCenter,
         ),
         ColumnMaker(
-          text: 'Net Sales',
+          text: StringKeys.net_sales.tr(),
           align: SunmiPrintAlign.RIGHT,
           width: _config.tripleColumnRight,
         ),
@@ -213,21 +218,21 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total Sales', data.modifierItemSummary.totalSales);
+    await _printTotalSales(StringKeys.total_sales.tr(), data.modifierItemSummary.totalSales);
   }
 
   Future<void> _printPaymentMethodSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Payment Method Summary');
+    await _printSummaryTitle(StringKeys.payment_method_summary.tr());
     await SunmiPrinter.bold();
     await SunmiPrinter.printRow(
       cols: [
         ColumnMaker(
-          text: 'Payment Method',
+          text: StringKeys.payment_method.tr(),
           align: SunmiPrintAlign.LEFT,
           width: _config.left,
         ),
         ColumnMaker(
-          text: 'Amount',
+          text: StringKeys.amount.tr(),
           align: SunmiPrintAlign.RIGHT,
           width: _config.right,
         ),
@@ -252,24 +257,24 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total', data.paymentMethodSummary.totalSales);
-    await _printTotalSales('Discount', data.paymentMethodSummary.discount);
+    await _printTotalSales(StringKeys.total.tr(), data.paymentMethodSummary.totalSales);
+    await _printTotalSales(StringKeys.discount.tr(), data.paymentMethodSummary.discount);
     await SunmiPrinter.line();
-    await _printTotalSales('Net', data.paymentMethodSummary.netSales);
+    await _printTotalSales(StringKeys.net_amount.tr(), data.paymentMethodSummary.netSales);
   }
 
   Future<void> _printPaymentChanelSummary(TemplateZReport data) async {
-    await _printSummaryTitle('Payment Channel Summary');
+    await _printSummaryTitle(StringKeys.payment_channel_summary.tr());
     await SunmiPrinter.bold();
     await SunmiPrinter.printRow(
       cols: [
         ColumnMaker(
-          text: 'Payment Channel',
+          text: StringKeys.payment_channel.tr(),
           align: SunmiPrintAlign.LEFT,
           width: _config.left,
         ),
         ColumnMaker(
-          text: 'Amount',
+          text: StringKeys.amount.tr(),
           align: SunmiPrintAlign.RIGHT,
           width: _config.right,
         ),
@@ -294,10 +299,10 @@ class SunmiZReportPrinter {
       );
     }
     await SunmiPrinter.line();
-    await _printTotalSales('Total', data.paymentChannelSummary.totalSales);
-    await _printTotalSales('Discount', data.paymentChannelSummary.discount);
+    await _printTotalSales(StringKeys.total.tr(), data.paymentChannelSummary.totalSales);
+    await _printTotalSales(StringKeys.discount.tr(), data.paymentChannelSummary.discount);
     await SunmiPrinter.line();
-    await _printTotalSales('Net', data.paymentChannelSummary.netSales);
+    await _printTotalSales(StringKeys.net_amount.tr(), data.paymentChannelSummary.netSales);
   }
 
   Future<void> _printSummaryTitle(String title) async {
@@ -335,13 +340,13 @@ class SunmiZReportPrinter {
   Future<void> _printFooter() async {
     await SunmiPrinter.lineWrap(1);
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    await SunmiPrinter.printText('Powered By');
+    await SunmiPrinter.printText(StringKeys.powered_by.tr());
     Uint8List byte = await _readFileBytes('packages/docket_design_template/assets/images/app_logo.jpg');
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
     await SunmiPrinter.printImage(byte);
     await SunmiPrinter.lineWrap(1);
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    await SunmiPrinter.printText('Klikit');
+    await SunmiPrinter.printText('klikit');
     await SunmiPrinter.lineWrap(2);
   }
 

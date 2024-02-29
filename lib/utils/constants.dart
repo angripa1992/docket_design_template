@@ -1,5 +1,6 @@
 class ProviderID {
   static const int KLIKIT = 1;
+  static const int UBER_EATS = 2;
   static const int GRAB_FOOD = 6;
   static const int FOOD_PANDA = 7;
   static const int GOFOOD = 9;
@@ -66,7 +67,6 @@ class FulfillmentStatusId{
 }
 
 class Consts {
-  static const String customerNote = "** Note to customer: check order receipt in delivery app for final price **";
   static const sunmiFirstColumnWidth = 18;
   static const sunmiSecondColumnWidth = 12;
   static const textWidth = 18;

@@ -1,3 +1,5 @@
+import 'package:docket_design_template/extensions.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:pdf/pdf.dart';
@@ -44,7 +46,7 @@ class ZReportDesign extends pw.StatelessWidget {
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
         pw.Text(
-          'Z-Report',
+          StringKeys.z_report.tr(),
           style: pw.TextStyle(
             color: PdfColors.black,
             fontSize: fontSize.extraLargeFontSize,
@@ -62,7 +64,7 @@ class ZReportDesign extends pw.StatelessWidget {
           ),
         ),
         pw.Text(
-          'Generated Date: ${data.generatedDate}',
+          '${StringKeys.generated_date.tr()}: ${data.generatedDate}',
           style: pw.TextStyle(
             color: PdfColors.black,
             fontSize: fontSize.mediumFontSize,
@@ -76,7 +78,7 @@ class ZReportDesign extends pw.StatelessWidget {
 
   pw.Widget _salesSummary() {
     return pw.Column(children: [
-      _title('Sales Summary'),
+      _title(StringKeys.sales_summary.tr()),
       pw.Column(
         children: data.salesSummary.summaries.map((summary) {
           return _doubleColumnTable(
@@ -92,16 +94,16 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total Sales', data.salesSummary.totalSales),
-      _total('Discount', data.salesSummary.discount),
+      _total(StringKeys.total_sales.tr(), data.salesSummary.totalSales),
+      _total(StringKeys.discount.tr(), data.salesSummary.discount),
       _divider(),
-      _total('Net Sales', data.salesSummary.netSales),
+      _total(StringKeys.net_sales.tr(), data.salesSummary.netSales),
     ]);
   }
 
   pw.Widget _brandSummary() {
     return pw.Column(children: [
-      _title('Brand Summary'),
+      _title(StringKeys.brand_summary.tr()),
       pw.Column(
         children: data.brandSummary.summaries.map((summary) {
           return _doubleColumnTable(
@@ -117,20 +119,20 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total Sales', data.brandSummary.totalSales),
-      _total('Discount', data.brandSummary.discount),
+      _total(StringKeys.total_sales.tr(), data.brandSummary.totalSales),
+      _total(StringKeys.discount.tr(), data.brandSummary.discount),
       _divider(),
-      _total('Net Sales', data.brandSummary.netSales),
+      _total(StringKeys.net_sales.tr(), data.brandSummary.netSales),
     ]);
   }
 
   pw.Widget _itemSummary() {
     return pw.Column(children: [
-      _title('Item Summary'),
+      _title(StringKeys.item_summary.tr()),
       _threeColumnTable(
-        left: 'Item',
-        center: 'Quantity',
-        right: 'Net Sales',
+        left: StringKeys.item.tr(),
+        center: StringKeys.quantity.tr(),
+        right: StringKeys.net_sales.tr(),
         textStyle: pw.TextStyle(
           color: PdfColors.black,
           fontSize: fontSize.mediumFontSize,
@@ -155,17 +157,17 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total Sales', data.itemSummary.totalSales),
+      _total(StringKeys.total_sales.tr(), data.itemSummary.totalSales),
     ]);
   }
 
   pw.Widget _itemModifierSummary() {
     return pw.Column(children: [
-      _title('Modifier Summary'),
+      _title(StringKeys.modifier_summary.tr()),
       _threeColumnTable(
-        left: 'Modifier',
-        center: 'Quantity',
-        right: 'Net Sales',
+        left: StringKeys.modifier.tr(),
+        center: StringKeys.quantity.tr(),
+        right: StringKeys.net_sales.tr(),
         textStyle: pw.TextStyle(
           color: PdfColors.black,
           fontSize: fontSize.mediumFontSize,
@@ -190,16 +192,16 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total Sales', data.modifierItemSummary.totalSales),
+      _total(StringKeys.total_sales.tr(), data.modifierItemSummary.totalSales),
     ]);
   }
 
   pw.Widget _paymentMethodSummary() {
     return pw.Column(children: [
-      _title('Payment Method Summary'),
+      _title(StringKeys.payment_method_summary.tr()),
       _doubleColumnTable(
-        left: 'Payment Method',
-        right: 'Amount',
+        left: StringKeys.payment_method.tr(),
+        right: StringKeys.amount.tr(),
         textStyle: pw.TextStyle(
           color: PdfColors.black,
           fontSize: fontSize.mediumFontSize,
@@ -223,19 +225,19 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total', data.paymentMethodSummary.totalSales),
-      _total('Discount', data.paymentMethodSummary.discount),
+      _total(StringKeys.total.tr(), data.paymentMethodSummary.totalSales),
+      _total(StringKeys.discount.tr(), data.paymentMethodSummary.discount),
       _divider(),
-      _total('Net', data.paymentMethodSummary.netSales),
+      _total(StringKeys.net_amount.tr(), data.paymentMethodSummary.netSales),
     ]);
   }
 
   pw.Widget _paymentChannelSummary() {
     return pw.Column(children: [
-      _title('Payment Channel Summary'),
+      _title(StringKeys.payment_channel_summary.tr()),
       _doubleColumnTable(
-        left: 'Payment Channel',
-        right: 'Amount',
+        left: StringKeys.payment_channel.tr(),
+        right: StringKeys.amount.tr(),
         textStyle: pw.TextStyle(
           color: PdfColors.black,
           fontSize: fontSize.mediumFontSize,
@@ -259,10 +261,10 @@ class ZReportDesign extends pw.StatelessWidget {
         }).toList(),
       ),
       _divider(),
-      _total('Total', data.paymentChannelSummary.totalSales),
-      _total('Discount', data.paymentChannelSummary.discount),
+      _total(StringKeys.total.tr(), data.paymentChannelSummary.totalSales),
+      _total(StringKeys.discount.tr(), data.paymentChannelSummary.discount),
       _divider(),
-      _total('Net', data.paymentChannelSummary.netSales),
+      _total(StringKeys.net_amount.tr(), data.paymentChannelSummary.netSales),
     ]);
   }
 

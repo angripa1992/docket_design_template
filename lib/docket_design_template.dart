@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:docket_design_template/model/cart.dart';
 import 'package:docket_design_template/model/order.dart';
 import 'package:docket_design_template/template/design_template.dart';
+import 'package:docket_design_template/translator.dart';
 import 'package:docket_design_template/utils/file_manager.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
@@ -21,7 +23,9 @@ class DocketDesignTemplate {
   Future<List<int>?> generateTicket(
     TemplateOrder order,
     PrinterConfiguration printerConfiguration,
+    Locale locale,
   ) async {
+    Translator.setLocale(locale);
     final cartMap = await _mapOrder(order);
     final file = await FileManager().createFile();
     final generatedPdf = await DesignTemplate().generatePdf(
@@ -32,8 +36,7 @@ class DocketDesignTemplate {
     await FileManager().writeToFile(file: file, bytesData: generatedPdf);
     final pdfImage = await _generatePdfImage(file);
     if (pdfImage == null) return null;
-    final printableImageBytes =
-        await _generateBytesFromPdfImage(pdfImage, printerConfiguration.roll);
+    final printableImageBytes = await _generateBytesFromPdfImage(pdfImage, printerConfiguration.roll);
     await FileManager().deleteFile(file);
     return printableImageBytes;
   }
@@ -41,7 +44,9 @@ class DocketDesignTemplate {
   Future<Uint8List?> generatePdfImage(
     TemplateOrder order,
     PrinterConfiguration printerConfiguration,
+    Locale locale,
   ) async {
+    Translator.setLocale(locale);
     final cartMap = await _mapOrder(order);
     final file = await FileManager().createFile();
     final generatedPdf = await DesignTemplate().generatePdf(
@@ -76,8 +81,7 @@ class DocketDesignTemplate {
       final decodedImage = im.decodeImage(imageBytes);
       List<int> printableImageBytes = [];
       final profile = await CapabilityProfile.load();
-      final generator = Generator(
-          (roll == Roll.mm80) ? PaperSize.mm80 : PaperSize.mm58, profile);
+      final generator = Generator((roll == Roll.mm80) ? PaperSize.mm80 : PaperSize.mm58, profile);
       printableImageBytes += generator.image(decodedImage!);
       printableImageBytes += generator.feed(2);
       printableImageBytes += generator.cut();

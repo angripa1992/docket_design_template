@@ -1,4 +1,6 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/font_size.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/template/total_price.dart';
 import 'package:docket_design_template/utils/constants.dart';
@@ -21,7 +23,7 @@ class PriceDetails extends pw.StatelessWidget {
       child: pw.Column(
         children: [
           _getSubtotalItem(
-            costName: 'Subtotal:',
+            costName: '${StringKeys.subtotal.tr()}:',
             amount: order.providerSubTotal,
             isSubTotal: true,
             fontSize: fontSize,
@@ -34,32 +36,32 @@ class PriceDetails extends pw.StatelessWidget {
             ),
           if (order.deliveryFee > 0)
             _getSubtotalItem(
-              costName: 'Delivery Fee:',
+              costName: '${StringKeys.delivery_fee.tr()}:',
               amount: order.deliveryFee,
               fontSize: fontSize,
             ),
           if (order.providerAdditionalFee > 0)
             _getSubtotalItem(
-              costName: 'Additional Fee:',
+              costName: '${StringKeys.additional_fee.tr()}:',
               amount: order.providerAdditionalFee,
               fontSize: fontSize,
             ),
           if (order.restaurantServiceFee > 0)
             _getSubtotalItem(
-              costName: 'Restaurant Service Fee:',
+              costName: '${StringKeys.restaurant_service_fee.tr()}:',
               amount: order.restaurantServiceFee,
               fontSize: fontSize,
             ),
           // if paidByCustomer is true then show service fee else not show
           if (order.serviceFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.serviceFee > 0)
             _getSubtotalItem(
-              costName: 'Service Fee:',
+              costName: '${StringKeys.service_fee.tr()}:',
               amount: order.serviceFee,
               fontSize: fontSize,
             ),
           if (order.gatewayFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.gatewayFee > 0)
             _getSubtotalItem(
-              costName: 'Processing Fee:',
+              costName: '${StringKeys.processing_fee.tr()}:',
               amount: order.gatewayFee,
               fontSize: fontSize,
             ),
@@ -77,21 +79,21 @@ class PriceDetails extends pw.StatelessWidget {
             ),
           if (order.customerDiscount > 0)
             _getSubtotalItem(
-              costName: 'Discount:',
+              costName: '${StringKeys.discount.tr()}:',
               amount: order.customerDiscount,
               isDiscount: true,
               fontSize: fontSize,
             ),
           if (order.rewardDiscount > 0)
             _getSubtotalItem(
-              costName: 'Reward:',
+              costName: '${StringKeys.reward.tr()}:',
               amount: order.rewardDiscount,
               isDiscount: true,
               fontSize: fontSize,
             ),
           if (order.roundOffAmount != 0 || order.providerRoundOffAmount != 0)
             _getSubtotalItem(
-              costName: 'Rounding Off:',
+              costName: '${StringKeys.reward.tr()}:',
               amount: order.isManualOrder ? order.roundOffAmount : order.providerRoundOffAmount,
               fontSize: fontSize,
               isRoundOff: true,
@@ -104,9 +106,9 @@ class PriceDetails extends pw.StatelessWidget {
 
   String _vatTitle() {
     if (order.providerId == ProviderID.FOOD_PANDA && !order.isInterceptorOrder && !order.isVatIncluded) {
-      return 'Vat';
+      return StringKeys.vat.tr();
     }
-    return 'Inc. Vat';
+    return StringKeys.inc_vat.tr();
   }
 
   pw.Widget _getSubtotalItem({

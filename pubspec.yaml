@@ -1,6 +1,7 @@
 name: docket_design_template
 description: A new Flutter package project.
 version: 0.0.1
+publish_to: none
 homepage:
 
 environment:
@@ -17,6 +18,7 @@ dependencies:
   pdfx: ^2.3.0
   sunmi_printer_plus: ^2.1.1
   esc_pos_utils_plus: ^2.0.1+4
+  sunmi_print_ticket: ^1.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter

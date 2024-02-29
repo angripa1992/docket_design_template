@@ -1,3 +1,5 @@
+import 'package:docket_design_template/extensions.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:pdf/pdf.dart';
@@ -26,12 +28,11 @@ class Footer extends pw.StatelessWidget {
       child: pw.Column(
         children: [
           pw.Text(
-            'Powered by',
+            StringKeys.powered_by.tr(),
             style: textStyle,
           ),
           pw.Padding(
-            padding:
-                const pw.EdgeInsets.symmetric(vertical: PaddingSize.regular),
+            padding: const pw.EdgeInsets.symmetric(vertical: PaddingSize.regular),
             child: pw.Image(
               AssetsManager().footerImage,
               width: 30,

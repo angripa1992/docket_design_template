@@ -47,6 +47,7 @@ class TemplateOrder {
   final int fulfillmentStatusId;
   final String fulfillmentTrackingUrl;
   final String pickupAt;
+  final String deliveryTime;
   final num providerSubTotal;
   final num providerGrandTotal;
   final num providerAdditionalFee;
@@ -62,6 +63,8 @@ class TemplateOrder {
   final bool mergeFeeEnabled;
   final bool gatewayFeePaidByCustomer;
   final bool serviceFeePaidByCustomer;
+  final bool isMerchantDelivery;
+  final String deliveryAddress;
 
   TemplateOrder({
     required this.id,
@@ -108,6 +111,7 @@ class TemplateOrder {
     required this.fulfillmentStatusId,
     required this.fulfillmentTrackingUrl,
     required this.pickupAt,
+    required this.deliveryTime,
     required this.providerSubTotal,
     required this.providerAdditionalFee,
     required this.providerGrandTotal,
@@ -123,5 +127,7 @@ class TemplateOrder {
     required this.providerRoundOffAmount,
     required this.gatewayFeePaidByCustomer,
     required this.serviceFeePaidByCustomer,
+    required this.isMerchantDelivery,
+    required this.deliveryAddress,
   });
 }

@@ -1,6 +1,7 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
-import 'package:docket_design_template/template/vertical_divider.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:docket_design_template/utils/order_info_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -32,7 +33,7 @@ class Header extends pw.StatelessWidget {
         //order date
 
         pw.Text(
-          'Order Date: ${DateTimeProvider.orderCreatedDate(order.createdAt)} at ${DateTimeProvider.orderCreatedTime(order.createdAt)}',
+          '${StringKeys.order_date.tr()}: ${DateTimeProvider.orderCreatedDate(order.createdAt)} ${StringKeys.at.tr()} ${DateTimeProvider.orderCreatedTime(order.createdAt)}',
           style: pw.TextStyle(
             color: PdfColors.black,
             fontSize: fontSize.mediumFontSize,
@@ -50,7 +51,7 @@ class Header extends pw.StatelessWidget {
               children: [
                 pw.Expanded(
                   child: pw.Text(
-                    'Queue No: ',
+                    '${StringKeys.queue_no.tr()}: ',
                     style: pw.TextStyle(
                       color: PdfColors.black,
                       fontSize: fontSize.extraLargeFontSize,
@@ -113,7 +114,7 @@ class Header extends pw.StatelessWidget {
         ),
         if (order.status != OrderStatus.CANCELLED && order.status != OrderStatus.DELIVERED && order.status != OrderStatus.PICKED_UP)
           pw.Text(
-            'Customer Name: ${order.userFirstName} ${order.userLastName}',
+            '${StringKeys.customer_name.tr()}: ${order.userFirstName} ${order.userLastName}',
             style: pw.TextStyle(
               color: PdfColors.black,
               fontSize: fontSize.mediumFontSize,
@@ -123,7 +124,7 @@ class Header extends pw.StatelessWidget {
           ),
         if (order.tableNo.isNotEmpty)
           pw.Text(
-            'Table No: #${order.tableNo}',
+            '${StringKeys.table_no.tr()}: #${order.tableNo}',
             style: pw.TextStyle(
               color: PdfColors.black,
               fontSize: fontSize.mediumFontSize,
@@ -131,38 +132,47 @@ class Header extends pw.StatelessWidget {
               fontFallback: AssetsManager().fontMediumFallback,
             ),
           ),
-        if (order.providerId == ProviderID.KLIKIT)
-          pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(
-              vertical: PaddingSize.regular,
+        if (order.deliveryTime.isNotEmpty)
+          pw.Text(
+            '${StringKeys.delivery_time.tr()}: ${order.deliveryTime}',
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: fontSize.mediumFontSize,
+              font: AssetsManager().fontMedium,
+              fontFallback: AssetsManager().fontMediumFallback,
             ),
-            child: pw.Row(
-              children: [
-                pw.Flexible(
-                  child: pw.Text(
-                    OrderInfoProvider().paymentStatus(order.paymentStatus),
-                    style: pw.TextStyle(
-                      color: PdfColors.black,
-                      fontSize: fontSize.mediumFontSize,
-                      font: AssetsManager().fontMedium,
-                      fontFallback: AssetsManager().fontMediumFallback,
-                    ),
-                  ),
-                ),
-                if (order.providerId == ProviderID.KLIKIT && order.paymentStatus == PaymentStatus.paid) MyVerticalDivider(),
-                if (order.providerId == ProviderID.KLIKIT && order.paymentStatus == PaymentStatus.paid)
-                  pw.Flexible(
-                    child: pw.Text(
-                      OrderInfoProvider().paymentMethod(order.paymentMethod),
-                      style: pw.TextStyle(
-                        color: PdfColors.black,
-                        fontSize: fontSize.mediumFontSize,
-                        font: AssetsManager().fontMedium,
-                        fontFallback: AssetsManager().fontMediumFallback,
-                      ),
-                    ),
-                  ),
-              ],
+          ),
+
+        if (order.isMerchantDelivery && order.deliveryAddress.isNotEmpty)
+          pw.Text(
+            '${StringKeys.delivery_address.tr()}: ${order.deliveryAddress}',
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: fontSize.mediumFontSize,
+              font: AssetsManager().fontMedium,
+              fontFallback: AssetsManager().fontMediumFallback,
+            ),
+          ),
+
+        if (order.providerId == ProviderID.KLIKIT)
+          pw.Text(
+            '${StringKeys.payment_status.tr()}: ${OrderInfoProvider().paymentStatus(order.paymentStatus)}',
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: fontSize.mediumFontSize,
+              font: AssetsManager().fontMedium,
+              fontFallback: AssetsManager().fontMediumFallback,
+            ),
+          ),
+
+        if ((order.providerId == ProviderID.KLIKIT && order.paymentStatus == PaymentStatus.paid) || (order.providerId == ProviderID.UBER_EATS && order.paymentMethod > 0))
+          pw.Text(
+            '${StringKeys.payment_method.tr()}: ${OrderInfoProvider().paymentMethod(order.paymentMethod)}',
+            style: pw.TextStyle(
+              color: PdfColors.black,
+              fontSize: fontSize.mediumFontSize,
+              font: AssetsManager().fontMedium,
+              fontFallback: AssetsManager().fontMediumFallback,
             ),
           ),
         pw.Padding(
@@ -170,7 +180,7 @@ class Header extends pw.StatelessWidget {
             bottom: PaddingSize.regular,
           ),
           child: pw.Text(
-            'Long ID:  #${order.externalId}',
+            '${StringKeys.long_id.tr()}:  #${order.externalId}',
             style: pw.TextStyle(
               color: PdfColors.black,
               fontSize: fontSize.mediumFontSize,
@@ -180,7 +190,7 @@ class Header extends pw.StatelessWidget {
           ),
         ),
         pw.Text(
-          'Branch Name: ${order.branchName}',
+          '${StringKeys.branch_name.tr()}: ${order.branchName}',
           style: pw.TextStyle(
             color: PdfColors.black,
             fontSize: fontSize.regularFontSize,
@@ -192,7 +202,7 @@ class Header extends pw.StatelessWidget {
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: PaddingSize.medium),
             child: pw.Text(
-              Consts.customerNote,
+              StringKeys.note_to_customer.tr(),
               style: pw.TextStyle(
                 color: PdfColors.black,
                 fontSize: fontSize.regularFontSize,
@@ -203,7 +213,7 @@ class Header extends pw.StatelessWidget {
           ),
         if (printingType == PrintingType.manual)
           pw.Text(
-            'Order Status: ${OrderInfoProvider().orderStatus(order.status)}',
+            '${StringKeys.order_status.tr()}: ${OrderInfoProvider().orderStatus(order.status)}',
             style: pw.TextStyle(
               color: PdfColors.black,
               fontSize: fontSize.regularFontSize,
@@ -213,7 +223,7 @@ class Header extends pw.StatelessWidget {
           ),
         if (order.pickupAt.isNotEmpty)
           pw.Text(
-            'Estimated Pickup Time: ${order.pickupAt}',
+            '${StringKeys.estimated_pickup_time.tr()}: ${order.pickupAt}',
             style: pw.TextStyle(
               color: PdfColors.black,
               fontSize: fontSize.regularFontSize,

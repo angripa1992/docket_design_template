@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/template/zreport_design.dart';
+import 'package:docket_design_template/translator.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:docket_design_template/utils/file_manager.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
@@ -25,33 +27,20 @@ class ZReportDesignTemplate {
 
   ZReportDesignTemplate._internal();
 
-  Future<List<int>?> generateTicket(
-    TemplateZReport data,
-    PrinterConfiguration printerConfiguration,
-  ) async {
+  Future<List<int>?> generateTicket(TemplateZReport data, PrinterConfiguration printerConfiguration, Locale locale) async {
     final file = await FileManager().createFile();
-    final generatedPdf = await _generatePdf(
-      data: data,
-      printerConfiguration: printerConfiguration,
-    );
+    final generatedPdf = await _generatePdf(data: data, printerConfiguration: printerConfiguration, locale: locale);
     await FileManager().writeToFile(file: file, bytesData: generatedPdf);
     final pdfImage = await _generatePdfImage(file);
     if (pdfImage == null) return null;
-    final printableImageBytes =
-        await _generateBytesFromPdfImage(pdfImage, printerConfiguration.roll);
+    final printableImageBytes = await _generateBytesFromPdfImage(pdfImage, printerConfiguration.roll);
     await FileManager().deleteFile(file);
     return printableImageBytes;
   }
 
-  Future<Uint8List?> generatePdfImage(
-    TemplateZReport data,
-    PrinterConfiguration printerConfiguration,
-  ) async {
+  Future<Uint8List?> generatePdfImage(TemplateZReport data, PrinterConfiguration printerConfiguration, Locale locale) async {
     final file = await FileManager().createFile();
-    final generatedPdf = await _generatePdf(
-      data: data,
-      printerConfiguration: printerConfiguration,
-    );
+    final generatedPdf = await _generatePdf(data: data, printerConfiguration: printerConfiguration, locale: locale);
     await FileManager().writeToFile(file: file, bytesData: generatedPdf);
     final pdfImage = await _generatePdfImage(file);
     await FileManager().deleteFile(file);
@@ -79,8 +68,7 @@ class ZReportDesignTemplate {
       final decodedImage = im.decodeImage(imageBytes);
       List<int> printableImageBytes = [];
       final profile = await CapabilityProfile.load();
-      final generator = Generator(
-          (roll == Roll.mm80) ? PaperSize.mm80 : PaperSize.mm58, profile);
+      final generator = Generator((roll == Roll.mm80) ? PaperSize.mm80 : PaperSize.mm58, profile);
       printableImageBytes += generator.image(decodedImage!);
       printableImageBytes += generator.feed(2);
       printableImageBytes += generator.cut();
@@ -93,12 +81,12 @@ class ZReportDesignTemplate {
   Future<Uint8List> _generatePdf({
     required TemplateZReport data,
     required PrinterConfiguration printerConfiguration,
+    required Locale locale,
   }) async {
-    final paperRoll = (printerConfiguration.roll == Roll.mm58)
-        ? RollPaperWidth.mm58
-        : RollPaperWidth.mm80;
+    final paperRoll = (printerConfiguration.roll == Roll.mm58) ? RollPaperWidth.mm58 : RollPaperWidth.mm80;
     final pdf = pw.Document();
     await AssetsManager().initAssets();
+    Translator.setLocale(locale);
     pdf.addPage(
       pw.Page(
         margin: const pw.EdgeInsets.all(0),
@@ -107,10 +95,7 @@ class ZReportDesignTemplate {
           double.infinity,
           marginAll: 0,
         ),
-        build: (pw.Context context) => ZReportDesign(
-          data: data,
-          fontSize: printerConfiguration.fontSize,
-        ),
+        build: (pw.Context context) => ZReportDesign(data: data, fontSize: printerConfiguration.fontSize),
       ),
     );
     return pdf.save();

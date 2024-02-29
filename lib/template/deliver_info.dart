@@ -1,3 +1,5 @@
+import 'package:docket_design_template/extensions.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/utils/date_time_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -28,22 +30,22 @@ class DeliverInfo extends pw.StatelessWidget {
           children: [
             if(order.fulfillmentExpectedPickupTime.isNotEmpty)
               pw.Text(
-                'PickUp Time: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
+                '${StringKeys.pickup_time.tr()}: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
                 style: textStyle,
               ),
             if(order.fulfillmentRider != null && order.fulfillmentRider?.name != null)
               pw.Text(
-                'Driver Name: ${order.fulfillmentRider!.name}',
+                '${StringKeys.driver_name.tr()}: ${order.fulfillmentRider!.name}',
                 style: textStyle,
               ),
             if(order.fulfillmentRider != null && order.fulfillmentRider?.phone != null)
               pw.Text(
-                'Driver Phone: ${order.fulfillmentRider!.phone}',
+                '${StringKeys.driver_phone.tr()}: ${order.fulfillmentRider!.phone}',
                 style: textStyle,
               ),
             if(order.fulfillmentRider != null && order.fulfillmentRider?.licensePlate != null)
               pw.Text(
-                'License Plate: ${order.fulfillmentRider!.licensePlate}',
+                '${StringKeys.license_plate.tr()}: ${order.fulfillmentRider!.licensePlate}',
                 style: textStyle,
               ),
           ]

@@ -1,4 +1,6 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/font_size.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:pdf/pdf.dart';
@@ -20,7 +22,7 @@ class ItemComment extends pw.StatelessWidget {
               bottom: PaddingSize.regular,
             ),
             child: pw.Text(
-              'Note: $comment',
+              '${StringKeys.note.tr()}: $comment',
               style: pw.TextStyle(
                 color: PdfColors.black,
                 fontSize: fontSize.smallFontSize,

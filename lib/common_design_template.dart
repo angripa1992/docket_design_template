@@ -1,9 +1,13 @@
 import 'dart:collection';
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/brand.dart';
 import 'package:docket_design_template/model/cart.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
+import 'package:docket_design_template/translator.dart';
 import 'package:docket_design_template/utils/constants.dart' as ddConsts;
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:docket_design_template/utils/date_time_provider.dart';
@@ -45,55 +49,65 @@ class CommonDesignTemplate {
     return map;
   }
 
-  Future<List<int>>? generateTicket({required TemplateOrder order, required bool isConsumerCopy, required Roll roll, required PrintingType printingType}) async {
+  Future<List<int>>? generateTicket({
+    required TemplateOrder order,
+    required bool isConsumerCopy,
+    required Roll roll,
+    required PrintingType printingType,
+    required Locale locale,
+  }) async {
+    Translator.setLocale(locale);
     final profile = await CapabilityProfile.load();
     final generator = Generator(roll == Roll.mm58 ? PaperSize.mm58 : PaperSize.mm80, profile);
 
     List<int> bytes = [];
 
-    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Order Date:', str2: DateTimeProvider.orderCreatedTime(order.createdAt));
+    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.order_date.tr()}:', str2: DateTimeProvider.orderCreatedTime(order.createdAt));
 
     if (!isConsumerCopy && order.queueNo.isNotEmpty) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Queue No:', str2: order.queueNo);
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.queue_no.tr()}:', str2: order.queueNo);
     }
     if (order.klikitComment.isNotEmpty) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Note:', str2: order.klikitComment);
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.note.tr()}:', str2: order.klikitComment);
     }
 
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: order.placedOn, str2: (order.providerId == ddConsts.ProviderID.KLIKIT) ? '#${order.id}' : '#${order.shortId}');
 
     if (order.status == ddConsts.OrderStatus.PLACED || order.status == ddConsts.OrderStatus.ACCEPTED || order.status == ddConsts.OrderStatus.READY) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Customer Name:', str2: '${order.userFirstName} ${order.userLastName}');
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.customer_name.tr()}:', str2: '${order.userFirstName} ${order.userLastName}');
     }
     if (order.tableNo.isNotEmpty) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Table No:', str2: '#${order.tableNo}');
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.table_no.tr()}:', str2: '#${order.tableNo}');
+    }
+    if (order.deliveryTime.isNotEmpty) {
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.delivery_time.tr()}:', str2: order.deliveryTime);
+    }
+    if (order.isMerchantDelivery && order.deliveryAddress.isNotEmpty) {
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.delivery_address.tr()}:', str2: order.deliveryAddress);
     }
     if (order.providerId == ddConsts.ProviderID.KLIKIT) {
-      var separator = " | ";
-      var paymentDisplay = OrderInfoProvider().paymentStatus(order.paymentStatus);
-      if (order.paymentStatus == ddConsts.PaymentStatus.paid) {
-        paymentDisplay += separator;
-        paymentDisplay += OrderInfoProvider().paymentMethod(order.paymentMethod);
-      }
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: paymentDisplay, str2: '');
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.payment_status.tr()}:', str2: OrderInfoProvider().paymentStatus(order.paymentStatus));
     }
-    bytes += PrinterHelper.rowBytes(data: 'Long ID: #${order.externalId}', generator: generator, posAlign: PosAlign.left, roll: roll);
+    if ((order.providerId == ProviderID.KLIKIT && order.paymentStatus == PaymentStatus.paid) || (order.providerId == ProviderID.UBER_EATS && order.paymentMethod > 0)) {
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.payment_method.tr()}:', str2: OrderInfoProvider().paymentMethod(order.paymentMethod));
+    }
+    bytes += PrinterHelper.rowBytes(data: '${StringKeys.long_id.tr()}: #${order.externalId}', generator: generator, posAlign: PosAlign.left, roll: roll);
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
-    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Branch Name: ', str2: order.branchName);
+    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.branch_name.tr()}: ', str2: order.branchName);
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
 
     if (isConsumerCopy) {
-      bytes += PrinterHelper.rowBytes(data: Consts.customerNote, generator: generator, posAlign: PosAlign.left, roll: roll);
+      bytes += PrinterHelper.rowBytes(data: StringKeys.note_to_customer.tr(), generator: generator, posAlign: PosAlign.left, roll: roll);
     }
     if (printingType == PrintingType.manual) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Order Status:', str2: OrderInfoProvider().orderStatus(order.status));
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.order_status.tr()}:', str2: OrderInfoProvider().orderStatus(order.status));
     }
     if (order.pickupAt.isNotEmpty) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'Estimated Pickup Time:', str2: order.pickupAt);
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.estimated_pickup_time.tr()}:', str2: order.pickupAt);
     }
 
     if (order.orderComment.isNotEmpty) {
-      bytes += PrinterHelper.rowBytes(data: 'Note: ${order.orderComment}', generator: generator, posAlign: PosAlign.left, roll: roll);
+      bytes += PrinterHelper.rowBytes(data: '${StringKeys.note.tr()}: ${order.orderComment}', generator: generator, posAlign: PosAlign.left, roll: roll);
     }
 
     // var totalItems = order.brands.length;
@@ -104,7 +118,7 @@ class CommonDesignTemplate {
       bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
       bytes += PrinterHelper.rowBytes(generator: generator, roll: roll, data: brand);
       bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${carts.length} item${carts.length > 1 ? '(s)' : ''}', str2: _orderType(order));
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${carts.length} ${StringKeys.item.tr().toLowerCase()}${carts.length > 1 ? '(s)' : ''}', str2: _orderType(order));
       bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
       for (var element in carts) {
         bytes += PrinterHelper.itemToBytes(
@@ -141,7 +155,7 @@ class CommonDesignTemplate {
       bytes += PrinterHelper.columnBytes(
           generator: generator,
           roll: roll,
-          str1: 'Subtotal:',
+          str1: '${StringKeys.subtotal.tr()}:',
           str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.providerSubTotal)));
       if (order.vat > 0) {
         bytes += PrinterHelper.columnBytes(
@@ -154,42 +168,42 @@ class CommonDesignTemplate {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Delivery Fee:',
+            str1: '${StringKeys.delivery_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.deliveryFee)));
       }
       if (order.providerAdditionalFee > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Additional Fee:',
+            str1: '${StringKeys.additional_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.additionalFee)));
       }
       if (order.restaurantServiceFee > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Restaurant Service Fee:',
+            str1: '${StringKeys.restaurant_service_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.restaurantServiceFee)));
       }
       if (order.serviceFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.serviceFee > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Service Fee:',
+            str1: '${StringKeys.service_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.serviceFee)));
       }
       if (order.gatewayFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.gatewayFee > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Processing Fee:',
+            str1: '${StringKeys.processing_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.gatewayFee)));
       }
       if (order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.paidByCustomer && order.mergeFee > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Processing Fee:',
+            str1: '${StringKeys.processing_fee.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.mergeFee)));
       }
       if (order.customFee > 0) {
@@ -203,14 +217,14 @@ class CommonDesignTemplate {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Discount:',
+            str1: '${StringKeys.discount.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.customerDiscount)));
       }
       if (order.rewardDiscount > 0) {
         bytes += PrinterHelper.columnBytes(
             generator: generator,
             roll: roll,
-            str1: 'Reward:',
+            str1: '${StringKeys.reward.tr()}:',
             str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.rewardDiscount)));
       }
       if (order.roundOffAmount != 0 || order.providerRoundOffAmount != 0) {
@@ -218,7 +232,7 @@ class CommonDesignTemplate {
         bytes += PrinterHelper.columnBytes(
           generator: generator,
           roll: roll,
-          str1: 'Rounding Off:',
+          str1: '${StringKeys.reward.tr()}:',
           str2: '${order.currencySymbol} ${amount.isNegative ? '' : '+'}${amount / 100}',
         );
       }
@@ -227,13 +241,13 @@ class CommonDesignTemplate {
       bytes += PrinterHelper.columnBytes(
           generator: generator,
           roll: roll,
-          str1: 'Total:',
+          str1: '${StringKeys.total.tr()}:',
           str2: PriceUtil.formatPrice(name: order.currency, currencySymbol: order.currencySymbol, price: PriceUtil.convertCentAmount(order.providerGrandTotal)));
     }
-    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: 'INTERNAL ID:', str2: '#${order.id}');
+    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.internal_id.tr().toUpperCase()}:', str2: '#${order.id}');
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
     //footer
-    bytes += generator.text('Powered by', styles: const PosStyles(align: PosAlign.center));
+    bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(align: PosAlign.center));
 
     // Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
     // final decodedImage = im.decodeImage(imageBytesFromAsset);
@@ -249,9 +263,9 @@ class CommonDesignTemplate {
 
   String _vatTitle(order) {
     if (order.providerId == ddConsts.ProviderID.FOOD_PANDA && !order.isInterceptorOrder && !order.isVatIncluded) {
-      return 'Vat';
+      return StringKeys.vat.tr();
     }
-    return 'Inc. Vat';
+    return StringKeys.inc_vat.tr();
   }
 
   String _orderType(order) {

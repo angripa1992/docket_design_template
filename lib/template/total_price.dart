@@ -1,5 +1,7 @@
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/font_size.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/template/assets_manager.dart';
 import 'package:docket_design_template/utils/price_calculator.dart';
 import 'package:pdf/pdf.dart';
@@ -23,7 +25,7 @@ class TotalPrice extends pw.StatelessWidget {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
         pw.Text(
-          'Total:',
+          '${StringKeys.total.tr()}:',
           style: textStyle,
         ),
         pw.Text(

@@ -1,14 +1,20 @@
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:docket_design_template/extensions.dart';
 import 'package:docket_design_template/model/brand.dart';
 import 'package:docket_design_template/model/cart.dart';
 import 'package:docket_design_template/model/order.dart';
+import 'package:docket_design_template/string_keys.dart';
+import 'package:docket_design_template/translator.dart';
 import 'package:docket_design_template/utils/constants.dart';
 import 'package:docket_design_template/utils/date_time_provider.dart';
 import 'package:docket_design_template/utils/order_info_provider.dart';
 import 'package:docket_design_template/utils/price_calculator.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:sunmi_print_ticket/sunmi_print_ticket.dart' as sunmi;
 import 'package:sunmi_printer_plus/column_maker.dart';
 import 'package:sunmi_printer_plus/enums.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
@@ -36,9 +42,11 @@ class SunmiDesignTemplate {
     // required PrintingType printingType,
     required PrinterConfiguration printerConfiguration,
     required int fontId,
+    required Locale locale,
   }) async {
     if (!await _bindingPrinter()) return;
 
+    Translator.setLocale(locale);
     SunmiFontSize fontSize = fromId(fontId);
 
     _config = sunmiSizeConfigFont(printerConfiguration.roll, fontSize);
@@ -95,98 +103,90 @@ class SunmiDesignTemplate {
   ) async {
     await SunmiPrinter.setFontSize(fontSize);
     await SunmiPrinter.printText(
-      'Order Date: ${DateTimeProvider.orderCreatedDate(order.createdAt)} at ${DateTimeProvider.orderCreatedTime(order.createdAt)}',
+      '${StringKeys.order_date.tr()}: ${DateTimeProvider.orderCreatedDate(order.createdAt)} ${StringKeys.at.tr()} ${DateTimeProvider.orderCreatedTime(order.createdAt)}',
     );
     await SunmiPrinter.resetFontSize();
 
     await SunmiPrinter.setFontSize(fontSize);
     await SunmiPrinter.bold();
     if (!isCustomerCopy && order.queueNo.isNotEmpty) {
-      await SunmiPrinter.printRow(cols: [
-        ColumnMaker(
-          text: 'Queue No: ',
-          align: SunmiPrintAlign.LEFT,
-          width: _config.left,
-        ),
-        ColumnMaker(
-          text: order.queueNo,
-          align: SunmiPrintAlign.RIGHT,
-          width: _config.right,
-        )
-      ]);
+      await printRow(
+        '${StringKeys.queue_no.tr()}: ',
+        order.queueNo,
+      );
     }
 
     await SunmiPrinter.resetFontSize();
 
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printRow(cols: [
-      ColumnMaker(
-        text: order.placedOn,
-        align: SunmiPrintAlign.LEFT,
-        width: _config.left,
-      ),
-      ColumnMaker(
-        text: order.providerId == ProviderID.KLIKIT ? '#${order.id}' : '#${order.shortId}',
-        align: SunmiPrintAlign.RIGHT,
-        width: _config.right,
-      )
-    ]);
+    await printRow(
+      order.placedOn,
+      order.providerId == ProviderID.KLIKIT ? '#${order.id}' : '#${order.shortId}',
+    );
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.resetBold();
 
     if (order.status != OrderStatus.CANCELLED && order.status != OrderStatus.DELIVERED && order.status != OrderStatus.PICKED_UP) {
       await SunmiPrinter.setFontSize(fontSize);
       await SunmiPrinter.printText(
-        'Customer Name: ${order.userFirstName} ${order.userLastName}',
+        '${StringKeys.customer_name.tr()}: ${order.userFirstName} ${order.userLastName}',
       );
       await SunmiPrinter.resetFontSize();
     }
 
     if (order.tableNo.isNotEmpty) {
       await SunmiPrinter.setFontSize(fontSize);
-      await SunmiPrinter.printText('Table No: #${order.tableNo}');
+      await SunmiPrinter.printText('${StringKeys.table_no.tr()}: #${order.tableNo}');
+      await SunmiPrinter.resetFontSize();
+    }
+
+    if (order.deliveryTime.isNotEmpty) {
+      await SunmiPrinter.setFontSize(fontSize);
+      await SunmiPrinter.printText('${StringKeys.delivery_time.tr()}: ${order.deliveryTime}');
+      await SunmiPrinter.resetFontSize();
+    }
+
+    if (order.isMerchantDelivery && order.deliveryAddress.isNotEmpty) {
+      await SunmiPrinter.setFontSize(fontSize);
+      await SunmiPrinter.printText('${StringKeys.delivery_address.tr()}: ${order.deliveryAddress}');
       await SunmiPrinter.resetFontSize();
     }
 
     if (order.providerId == ProviderID.KLIKIT) {
       await SunmiPrinter.setFontSize(fontSize);
-      await SunmiPrinter.printRow(cols: [
-        ColumnMaker(
-          text: OrderInfoProvider().paymentStatus(order.paymentStatus),
-          align: SunmiPrintAlign.LEFT,
-          width: _config.left,
-        ),
-        ColumnMaker(
-          text: OrderInfoProvider().paymentMethod(order.paymentMethod),
-          align: SunmiPrintAlign.RIGHT,
-          width: _config.right,
-        )
-      ]);
+      await SunmiPrinter.printText('${StringKeys.payment_status.tr()}:  #${OrderInfoProvider().paymentStatus(order.paymentStatus)}');
       await SunmiPrinter.resetFontSize();
     }
+
+    if ((order.providerId == ProviderID.KLIKIT && order.paymentStatus == PaymentStatus.paid) || (order.providerId == ProviderID.UBER_EATS && order.paymentMethod > 0)) {
+      await SunmiPrinter.setFontSize(fontSize);
+      await SunmiPrinter.printText('${StringKeys.payment_method.tr()}:  #${OrderInfoProvider().paymentMethod(order.paymentMethod)}');
+      await SunmiPrinter.resetFontSize();
+    }
+
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText('Long ID:  #${order.externalId}');
+    await SunmiPrinter.printText('${StringKeys.long_id.tr()}:  #${order.externalId}');
     await SunmiPrinter.resetFontSize();
 
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText('Branch Name: ${order.branchName}');
+    await SunmiPrinter.printText('${StringKeys.branch_name.tr()}: ${order.branchName}');
     await SunmiPrinter.resetFontSize();
 
     if (isCustomerCopy) {
       await SunmiPrinter.setFontSize(fontSize);
-      await SunmiPrinter.printText(Consts.customerNote);
+      await SunmiPrinter.printText(StringKeys.note_to_customer.tr());
       await SunmiPrinter.resetFontSize();
     }
 
     if (printingType == PrintingType.manual) {
       await SunmiPrinter.setFontSize(fontSize);
-      await SunmiPrinter.printText('Order Status: ${OrderInfoProvider().orderStatus(order.status)}');
+      await SunmiPrinter.printText('${StringKeys.order_status.tr()}: ${OrderInfoProvider().orderStatus(order.status)}');
       await SunmiPrinter.resetFontSize();
     }
 
     if (order.pickupAt.isNotEmpty) {
       await SunmiPrinter.setFontSize(fontSize);
-      await SunmiPrinter.printText('Estimated Pickup Time: ${order.pickupAt}');
+      await SunmiPrinter.printText('${StringKeys.estimated_pickup_time.tr()}: ${order.pickupAt}');
       await SunmiPrinter.resetFontSize();
     }
   }
@@ -203,18 +203,10 @@ class SunmiDesignTemplate {
     await SunmiPrinter.resetFontSize();
 
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printRow(cols: [
-      ColumnMaker(
-        text: "$itemCount item${itemCount > 1 ? '(s)' : ''}",
-        align: SunmiPrintAlign.LEFT,
-        width: _config.left,
-      ),
-      ColumnMaker(
-        text: orderType,
-        align: SunmiPrintAlign.RIGHT,
-        width: _config.right,
-      )
-    ]);
+    await printRow(
+      "$itemCount ${StringKeys.item.tr().toLowerCase()}${itemCount > 1 ? '(s)' : ''}",
+      orderType,
+    );
     await SunmiPrinter.resetFontSize();
     await generateSunmiSeparator();
   }
@@ -265,18 +257,10 @@ class SunmiDesignTemplate {
     await SunmiPrinter.bold();
     await SunmiPrinter.setFontSize(fontSize);
     isCustomerCopy
-        ? await SunmiPrinter.printRow(cols: [
-            ColumnMaker(
-              text: "${cart.quantity}X${cart.name}",
-              align: SunmiPrintAlign.LEFT,
-              width: _config.left,
-            ),
-            ColumnMaker(
-              text: isCustomerCopy ? itemPrice : "",
-              align: SunmiPrintAlign.RIGHT,
-              width: _config.right,
-            )
-          ])
+        ? await printRow(
+            "${cart.quantity}X${cart.name}",
+            isCustomerCopy ? itemPrice : "",
+          )
         : await SunmiPrinter.printText('${cart.quantity}X${cart.name}');
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.resetBold();
@@ -285,7 +269,7 @@ class SunmiDesignTemplate {
   Future printItemNote(String itemNote, SunmiFontSize fontSize) async {
     await SunmiPrinter.bold();
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText('Note: $itemNote');
+    await SunmiPrinter.printText('${StringKeys.note.tr()}: $itemNote');
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.resetBold();
   }
@@ -394,24 +378,13 @@ class SunmiDesignTemplate {
 
   Future getGroup(String groupName, int space, SunmiFontSize fontSize) async {
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printRow(cols: [
-      ColumnMaker(
-        text: " ",
-        align: SunmiPrintAlign.LEFT,
-        width: space,
-      ),
-      ColumnMaker(
-        text: groupName,
-        align: SunmiPrintAlign.LEFT,
-        width: (_config.left + _config.right) - space,
-      ),
-    ]);
+    await printRow(" ", groupName);
     await SunmiPrinter.resetFontSize();
   }
 
   Future generatePriceBreakdown(TemplateOrder order, SunmiFontSize fontSize) async {
     await getPriceBreakdown(
-      costName: 'Subtotal:',
+      costName: '${StringKeys.subtotal.tr()}:',
       amount: order.providerSubTotal,
       isSubTotal: true,
       order: order,
@@ -427,7 +400,7 @@ class SunmiDesignTemplate {
     }
     if (order.deliveryFee > 0) {
       await getPriceBreakdown(
-        costName: 'Delivery Fee:',
+        costName: '${StringKeys.delivery_fee.tr()}:',
         amount: order.deliveryFee,
         order: order,
         fontSize: fontSize,
@@ -435,7 +408,7 @@ class SunmiDesignTemplate {
     }
     if (order.providerAdditionalFee > 0) {
       await getPriceBreakdown(
-        costName: 'Additional Fee:',
+        costName: '${StringKeys.additional_fee.tr()}:',
         amount: order.providerAdditionalFee,
         order: order,
         fontSize: fontSize,
@@ -443,7 +416,7 @@ class SunmiDesignTemplate {
     }
     if (order.restaurantServiceFee > 0) {
       await getPriceBreakdown(
-        costName: 'Restaurant Service Fee:',
+        costName: '${StringKeys.restaurant_service_fee.tr()}:',
         amount: order.restaurantServiceFee,
         order: order,
         fontSize: fontSize,
@@ -452,7 +425,7 @@ class SunmiDesignTemplate {
     // if paidByCustomer is true then show service fee and processing fee else not show
     if (order.serviceFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.serviceFee > 0) {
       await getPriceBreakdown(
-        costName: 'Service Fee:',
+        costName: '${StringKeys.service_fee.tr()}:',
         amount: order.serviceFee,
         order: order,
         fontSize: fontSize,
@@ -460,7 +433,7 @@ class SunmiDesignTemplate {
     }
     if (order.gatewayFeePaidByCustomer && !order.mergeFeeEnabled && order.providerId == ProviderID.KLIKIT && order.gatewayFee > 0) {
       await getPriceBreakdown(
-        costName: 'Processing Fee:',
+        costName: '${StringKeys.processing_fee.tr()}:',
         amount: order.gatewayFee,
         order: order,
         fontSize: fontSize,
@@ -484,7 +457,7 @@ class SunmiDesignTemplate {
     }
     if (order.customerDiscount > 0) {
       await getPriceBreakdown(
-        costName: 'Discount:',
+        costName: '${StringKeys.discount.tr()}:',
         amount: order.customerDiscount,
         isDiscount: true,
         order: order,
@@ -493,7 +466,7 @@ class SunmiDesignTemplate {
     }
     if (order.rewardDiscount > 0) {
       await getPriceBreakdown(
-        costName: 'Reward:',
+        costName: '${StringKeys.reward.tr()}:',
         amount: order.rewardDiscount,
         isDiscount: true,
         order: order,
@@ -502,14 +475,14 @@ class SunmiDesignTemplate {
     }
     if (order.roundOffAmount != 0 || order.providerRoundOffAmount != 0) {
       await getPriceBreakdown(
-        costName: 'Rounding Off:',
+        costName: '${StringKeys.reward.tr()}:',
         amount: order.isManualOrder ? order.roundOffAmount : order.providerRoundOffAmount,
         order: order,
         isRoundOff: true,
         fontSize: fontSize,
       );
     }
-    await getPriceBreakdown(costName: 'Total:', amount: order.providerGrandTotal, isTotal: true, order: order, fontSize: fontSize);
+    await getPriceBreakdown(costName: '${StringKeys.total.tr()}:', amount: order.providerGrandTotal, isTotal: true, order: order, fontSize: fontSize);
   }
 
   Future getPriceBreakdown({
@@ -526,18 +499,10 @@ class SunmiDesignTemplate {
     if (isTotal) {
       await SunmiPrinter.bold();
     }
-    await SunmiPrinter.printRow(cols: [
-      ColumnMaker(
-        text: costName,
-        align: SunmiPrintAlign.LEFT,
-        width: _config.left,
-      ),
-      ColumnMaker(
-        text: isRoundOff ? '${order.currencySymbol} ${amount.isNegative ? '' : '+'}${amount / 100}' : '${isDiscount ? '-' : ''}${PriceCalculator.convertPrice(order, amount)}',
-        align: SunmiPrintAlign.RIGHT,
-        width: _config.right,
-      )
-    ]);
+
+    String value = isRoundOff ? '${order.currencySymbol} ${amount.isNegative ? '' : '+'}${amount / 100}' : '${isDiscount ? '-' : ''}${PriceCalculator.convertPrice(order, amount)}';
+    await printRow(costName, value);
+
     if (isTotal) {
       await SunmiPrinter.resetBold();
     }
@@ -547,18 +512,7 @@ class SunmiDesignTemplate {
   Future generateInternalID(TemplateOrder order, SunmiFontSize fontSize) async {
     await SunmiPrinter.bold();
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printRow(cols: [
-      ColumnMaker(
-        text: "INTERNAL ID",
-        align: SunmiPrintAlign.LEFT,
-        width: _config.left,
-      ),
-      ColumnMaker(
-        text: '#${order.id}',
-        align: SunmiPrintAlign.RIGHT,
-        width: _config.right,
-      )
-    ]);
+    await printRow(StringKeys.internal_id.tr().toUpperCase(), '#${order.id}');
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.resetBold();
   }
@@ -577,7 +531,7 @@ class SunmiDesignTemplate {
   Future generateFooter(SunmiFontSize fontSize) async {
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText('Powered By');
+    await SunmiPrinter.printText(StringKeys.powered_by.tr());
     await SunmiPrinter.resetFontSize();
 
     Uint8List byte = await _getImageFromAsset('packages/docket_design_template/assets/images/app_logo.jpg');
@@ -588,7 +542,7 @@ class SunmiDesignTemplate {
 
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText('Klikit');
+    await SunmiPrinter.printText('klikit');
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.lineWrap(2);
   }
@@ -596,7 +550,7 @@ class SunmiDesignTemplate {
   Future printOrderComment(String comment, SunmiFontSize fontSize) async {
     await SunmiPrinter.bold();
     await SunmiPrinter.setFontSize(fontSize);
-    await SunmiPrinter.printText("Note: $comment");
+    await SunmiPrinter.printText("${StringKeys.note.tr()}: $comment");
     await SunmiPrinter.resetFontSize();
     await SunmiPrinter.resetBold();
   }
@@ -605,7 +559,7 @@ class SunmiDesignTemplate {
     if (order.fulfillmentExpectedPickupTime.isNotEmpty) {
       await SunmiPrinter.setFontSize(fontSize);
       await SunmiPrinter.printText(
-        'PickUp Time: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
+        '${StringKeys.pickup_time.tr()}: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
       );
       await SunmiPrinter.resetFontSize();
     }
@@ -613,7 +567,7 @@ class SunmiDesignTemplate {
     if (order.fulfillmentRider != null && order.fulfillmentRider?.name != null) {
       await SunmiPrinter.setFontSize(fontSize);
       await SunmiPrinter.printText(
-        'Driver Name: ${order.fulfillmentRider!.name}',
+        '${StringKeys.driver_name.tr()}: ${order.fulfillmentRider!.name}',
       );
       await SunmiPrinter.resetFontSize();
     }
@@ -621,7 +575,7 @@ class SunmiDesignTemplate {
     if (order.fulfillmentRider != null && order.fulfillmentRider?.phone != null) {
       await SunmiPrinter.setFontSize(fontSize);
       await SunmiPrinter.printText(
-        'Driver Phone: ${order.fulfillmentRider!.phone}',
+        '${StringKeys.driver_phone.tr()}: ${order.fulfillmentRider!.phone}',
       );
       await SunmiPrinter.resetFontSize();
     }
@@ -629,13 +583,13 @@ class SunmiDesignTemplate {
     if (order.fulfillmentRider != null && order.fulfillmentRider?.phone != null) {
       await SunmiPrinter.setFontSize(fontSize);
       await SunmiPrinter.printText(
-        'License Plate: ${order.fulfillmentRider!.licensePlate}',
+        '${StringKeys.license_plate.tr()}: ${order.fulfillmentRider!.licensePlate}',
       );
       await SunmiPrinter.resetFontSize();
     }
     await SunmiPrinter.setFontSize(fontSize);
     await SunmiPrinter.printText(
-      'PickUp Time: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
+      '${StringKeys.pickup_time.tr()}: ${DateTimeProvider.pickupTime(order.fulfillmentExpectedPickupTime)}',
     );
     await SunmiPrinter.resetFontSize();
   }
@@ -668,9 +622,9 @@ class SunmiDesignTemplate {
 
   String _vatTitle(TemplateOrder order) {
     if (order.providerId == ProviderID.FOOD_PANDA && !order.isInterceptorOrder && !order.isVatIncluded) {
-      return 'Vat';
+      return StringKeys.vat.tr();
     }
-    return 'Inc. Vat';
+    return StringKeys.inc_vat.tr();
   }
 
   String printSpaces(int value) {
@@ -689,6 +643,32 @@ class SunmiDesignTemplate {
         return SunmiFontSize.LG;
       default:
         return SunmiFontSize.MD;
+    }
+  }
+
+  Future printRow(String label, String value) async {
+    if (Translator.getLocale().languageCode == 'th') {
+      await sunmi.SunmiPrinter.bindPrinterService();
+      // width: 10 Width of column , 0 - LEFT, 1 - CENTER, 2 - RIGHT
+      await sunmi.SunmiPrinter.printTable(cols: [
+        sunmi.ColumnMaker(text: label, width: _config.left, align: 0),
+        sunmi.ColumnMaker(text: value, width: _config.right, align: 2),
+      ]);
+      await sunmi.SunmiPrinter.resetFontSize();
+      await sunmi.SunmiPrinter.unbindPrinterService();
+    } else {
+      await SunmiPrinter.printRow(cols: [
+        ColumnMaker(
+          text: label,
+          align: SunmiPrintAlign.LEFT,
+          width: _config.left,
+        ),
+        ColumnMaker(
+          text: value,
+          align: SunmiPrintAlign.RIGHT,
+          width: _config.right,
+        )
+      ]);
     }
   }
 }
