@@ -17,7 +17,6 @@ dependencies:
   esc_pos_utils: ^1.1.0
   pdfx: ^2.3.0
   sunmi_printer_plus: ^2.1.1
-  esc_pos_utils_plus: ^2.0.1+4
   sunmi_print_ticket: ^1.0.7
 dev_dependencies:
   flutter_test:

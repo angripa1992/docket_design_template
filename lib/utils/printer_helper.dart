@@ -1,6 +1,5 @@
 import 'package:docket_design_template/utils/price_utils.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
-import 'package:docket_design_template/utils/printerenum.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
 
 class PrinterHelper{
@@ -9,6 +8,8 @@ class PrinterHelper{
   static const String lines = '--------------------------------------------------------';
   static const PosStyles posStylesDefault = PosStyles(bold:true);
   static String getSpaces(int n){
+    if(n < 1)
+      return "";
     return spaceList.substring(0,n);
   }
 
@@ -57,40 +58,52 @@ class PrinterHelper{
     temp += str2;
     return temp;
   }
-  static List<int> rowBytes({required Generator generator,required Roll roll, required String data,  PosAlign? posAlign}){
+  static List<int> rowBytes({required Generator generator,required Roll roll, required String data,  PosStyles? posStyles}){
     List<int> bytes = [];
-    PosStyles posStyles = const PosStyles(align: PosAlign.left,bold:false);
+    PosStyles aPosStyle = const PosStyles(align: PosAlign.left);
+    if(posStyles != null){
+      aPosStyle = posStyles;
+    }
     List<String> printData = splitText(text: data,roll: roll);
     for (var st in printData) {
-      bytes += generator.text(st, styles:  posStyles);
+      bytes += generator.text(st, styles:  aPosStyle);
     }
 
     return bytes;
   }
+  static List<int> columnBytes({required Generator generator,required Roll roll, required String str1, required String str2, PosStyles? posStyles}){
 
-  static List<int> columnBytes({required Generator generator,required Roll roll, required String str1, required String str2}){
     List<int> bytes = [];
-
-    int length = roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value;
-    int dataLength = str1.length + str2.length + 1;
-    if(dataLength <= length){
-      return generator.text(str1 + getSpaces(length-dataLength) + str2, styles:  const PosStyles(align: PosAlign.left));
+    PosStyles aPosStyle = const PosStyles(align: PosAlign.left);
+    if(posStyles != null){
+      aPosStyle = posStyles;
     }
-    int str1ToCut = length - str2.length - 2;
-    String firstItem = str1.substring(0,str1ToCut)+' '+str2;
-    bytes += generator.text(firstItem, styles: PosStyles.defaults());
-    String data = str1.substring(str1ToCut);
-    List<String> printData = splitText(text: data,roll: roll);
-    for (var st in printData) {
-      bytes += generator.text(st, styles:  const PosStyles(align: PosAlign.left));
-    }
+    int maxPerColumn = (roll==Roll.mm58 ? PaperLength.max_mm58.value ~/ 2 : PaperLength.max_mm80.value ~/ 2);
+    int totalRows = 1 + (str1.length > str2.length ? str1.length~/maxPerColumn : str2.length~/maxPerColumn);
+    int currPosition = 0;
 
+    for(int i=0;i<totalRows;i++) {
+      String s1="";
+      String s2="";
+
+      if(currPosition < str1.length){
+        s1 += str1.substring(currPosition,  currPosition + maxPerColumn > str1.length ? str1.length : currPosition + maxPerColumn);
+        s1 += getSpaces(maxPerColumn - s1.length);
+      }
+      if(currPosition < str2.length){
+        String str = str2.substring(currPosition, currPosition + maxPerColumn > str1.length ? str2.length : currPosition + maxPerColumn);
+        s2 += getSpaces(maxPerColumn - str.length);
+        s2 += str;
+      }
+      currPosition += maxPerColumn;
+      bytes += generator.text('$s1$s2', styles: aPosStyle);
+
+    }
     return bytes;
   }
 
   static List<int> itemToBytes({required Generator generator,required Roll roll,required int quantity, required String itemName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign}){
     List<int> bytes = [];
-
     String amt = PriceUtil.formatPrice(name:currency,currencySymbol: currencySymbol, price:num.parse(price) * quantity);
     int priceLength = amt.length;
     String qty = '${quantity}x ';
@@ -136,7 +149,7 @@ class PrinterHelper{
     }
     int totalFirstCharsPrinter = modifierName.length + spaceInLength - 1;
     firstItem = customerCopy ? '$qty${modifierName.substring(0, totalFirstCharsPrinter)} $amt' : '$qty${modifierName.substring(0, totalFirstCharsPrinter)}';
-    bytes += generator.text(firstItem, styles: PosStyles.defaults());
+    bytes += generator.text(firstItem, styles: const PosStyles.defaults());
 
     //print next line item
     String nextStr = modifierName.substring(totalFirstCharsPrinter);
