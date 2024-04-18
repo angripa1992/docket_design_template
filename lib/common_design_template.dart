@@ -129,7 +129,7 @@ class CommonDesignTemplate {
             generator: generator,
             roll: roll,
             quantity: element.quantity,
-            itemName: element.name,
+            itemName:  _removeSpecialIcon(element.name),
             price: element.unitPrice,
             currency: order.currency,
             currencySymbol: order.currencySymbol,
@@ -142,7 +142,7 @@ class CommonDesignTemplate {
                   generator: generator,
                   roll: roll,
                   quantity: modifier.quantity,
-                  modifierName: modifier.name,
+                  modifierName: _removeSpecialIcon(modifier.name),
                   price: modifier.unitPrice,
                   currency: order.currency,
                   currencySymbol: order.currencySymbol,
@@ -284,7 +284,9 @@ class CommonDesignTemplate {
       return 'Manual';
     }
   }
-
+  String _removeSpecialIcon(String s){
+    return s.replaceAll("✨", "");
+  }
   Future<Uint8List> readFileBytes(String path) async {
     ByteData fileData = await rootBundle.load(path);
     Uint8List fileUnit8List = fileData.buffer.asUint8List(fileData.offsetInBytes, fileData.lengthInBytes);
