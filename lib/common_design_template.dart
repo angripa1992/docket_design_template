@@ -129,6 +129,7 @@ class CommonDesignTemplate {
             generator: generator,
             roll: roll,
             quantity: element.quantity,
+            // itemName:  element.name,
             itemName:  PrinterHelper.removeSpecialIcon(element.name),
             price: element.unitPrice,
             currency: order.currency,
@@ -142,7 +143,8 @@ class CommonDesignTemplate {
                   generator: generator,
                   roll: roll,
                   quantity: modifier.quantity,
-                  modifierName: PrinterHelper.removeSpecialIcon(modifier.name),
+                  modifierName: modifier.name,
+                  // modifierName: PrinterHelper.removeSpecialIcon(modifier.name),
                   price: modifier.unitPrice,
                   currency: order.currency,
                   currencySymbol: order.currencySymbol,
@@ -257,7 +259,7 @@ class CommonDesignTemplate {
     Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
     final decodedImage = im.decodeImage(imageBytesFromAsset);
 
-    bytes += generator.imageRaster(decodedImage!, align: PosAlign.center);
+    bytes += generator.imageRaster(decodedImage!);
 
     bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
     bytes += generator.feed(2);

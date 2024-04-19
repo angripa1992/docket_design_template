@@ -75,29 +75,28 @@ class PrinterHelper{
 
     List<int> bytes = [];
     PosStyles aPosStyle = const PosStyles(align: PosAlign.left);
-    if(posStyles != null){
+    if (posStyles != null) {
       aPosStyle = posStyles;
     }
-    int maxPerColumn = (roll==Roll.mm58 ? PaperLength.max_mm58.value ~/ 2 : PaperLength.max_mm80.value ~/ 2);
-    int totalRows = 1 + (str1.length > str2.length ? str1.length~/maxPerColumn : str2.length~/maxPerColumn);
+    int maxPerColumn = (roll == Roll.mm58 ? PaperLength.max_mm58.value ~/ 2 : PaperLength.max_mm80.value ~/ 2);
+    num totalRows = ((str1.length + maxPerColumn - 1) ~/ maxPerColumn).clamp(1, double.infinity);
     int currPosition = 0;
 
-    for(int i=0;i<totalRows;i++) {
-      String s1="";
-      String s2="";
+    for (int i = 0; i < totalRows; i++) {
+      String s1 = "";
+      String s2 = "";
 
-      if(currPosition < str1.length){
-        s1 += str1.substring(currPosition,  currPosition + maxPerColumn > str1.length ? str1.length : currPosition + maxPerColumn);
+      if (currPosition < str1.length) {
+        s1 += str1.substring(currPosition, currPosition + maxPerColumn > str1.length ? str1.length : currPosition + maxPerColumn);
         s1 += getSpaces(maxPerColumn - s1.length);
       }
-      if(currPosition < str2.length){
-        String str = str2.substring(currPosition, currPosition + maxPerColumn > str1.length ? str2.length : currPosition + maxPerColumn);
+      if (currPosition < str2.length) {
+        String str = str2.substring(currPosition, currPosition + maxPerColumn > str2.length ? str2.length : currPosition + maxPerColumn);
         s2 += getSpaces(maxPerColumn - str.length);
         s2 += str;
       }
       currPosition += maxPerColumn;
       bytes += generator.text('$s1$s2', styles: aPosStyle);
-
     }
     return bytes;
   }
