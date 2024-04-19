@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:docket_design_template/extensions.dart';
@@ -7,6 +8,8 @@ import 'package:docket_design_template/utils/extension.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
 import 'package:docket_design_template/utils/printer_helper.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
+import 'package:flutter/services.dart';
+import 'package:image/image.dart' as im;
 
 import 'model/z_report_data.dart';
 
@@ -66,7 +69,7 @@ class CommonZReportTemplate {
     bytes += generator.text(StringKeys.item_summary.tr(), styles: const PosStyles(bold: true, align: PosAlign.center));
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: StringKeys.item.tr(), str2: StringKeys.net_sales.tr());
     for (var summary in data.itemSummary.summaries) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${summary.quantity}x ${summary.name}', str2: summary.amount.replacePhp());
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${summary.quantity}x ${PrinterHelper.removeSpecialIcon(summary.name)}', str2: summary.amount.replacePhp());
     }
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: StringKeys.total_sales.tr(), str2: data.itemSummary.totalSales.replacePhp());
@@ -78,7 +81,7 @@ class CommonZReportTemplate {
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: StringKeys.item.tr(), str2: StringKeys.net_sales.tr());
 
     for (var summary in data.modifierItemSummary.summaries) {
-      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${summary.quantity}x ${summary.name}', str2: summary.amount.replacePhp());
+      bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${summary.quantity}x ${PrinterHelper.removeSpecialIcon(summary.name)}', str2: summary.amount.replacePhp());
     }
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: StringKeys.total_sales.tr(), str2: data.modifierItemSummary.totalSales.replacePhp());
@@ -118,15 +121,22 @@ class CommonZReportTemplate {
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
 
     //footer
-    bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(bold: true, align: PosAlign.center));
-    // ByteData bytesData = await rootBundle.load("packages/docket_design_template/assets/images/app_logo.jpg");
-    // Uint8List imageBytesFromAsset = bytesData.buffer
-    //     .asUint8List(bytesData.offsetInBytes, bytesData.lengthInBytes);
-    // final decodedImage = im.decodeImage(imageBytesFromAsset);
-    // bytes += generator.image(decodedImage!);
-    bytes += generator.text('klikit', styles: const PosStyles(bold: true, align: PosAlign.center));
+    bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(align: PosAlign.center));
+
+    Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
+    final decodedImage = im.decodeImage(imageBytesFromAsset);
+
+    bytes += generator.imageRaster(decodedImage!, align: PosAlign.center);
+
+    bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
     bytes += generator.feed(2);
     bytes += generator.cut();
     return bytes;
+  }
+
+  Future<Uint8List> readFileBytes(String path) async {
+    ByteData fileData = await rootBundle.load(path);
+    Uint8List fileUnit8List = fileData.buffer.asUint8List(fileData.offsetInBytes, fileData.lengthInBytes);
+    return fileUnit8List;
   }
 }

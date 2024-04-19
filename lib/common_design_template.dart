@@ -129,7 +129,7 @@ class CommonDesignTemplate {
             generator: generator,
             roll: roll,
             quantity: element.quantity,
-            itemName:  _removeSpecialIcon(element.name),
+            itemName:  PrinterHelper.removeSpecialIcon(element.name),
             price: element.unitPrice,
             currency: order.currency,
             currencySymbol: order.currencySymbol,
@@ -142,7 +142,7 @@ class CommonDesignTemplate {
                   generator: generator,
                   roll: roll,
                   quantity: modifier.quantity,
-                  modifierName: _removeSpecialIcon(modifier.name),
+                  modifierName: PrinterHelper.removeSpecialIcon(modifier.name),
                   price: modifier.unitPrice,
                   currency: order.currency,
                   currencySymbol: order.currencySymbol,
@@ -259,7 +259,7 @@ class CommonDesignTemplate {
 
     bytes += generator.imageRaster(decodedImage!, align: PosAlign.center);
 
-    bytes += generator.text('klikit', styles: const PosStyles(bold:false,align: PosAlign.center));
+    bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
     bytes += generator.feed(2);
     bytes += generator.cut();
 
@@ -284,9 +284,7 @@ class CommonDesignTemplate {
       return 'Manual';
     }
   }
-  String _removeSpecialIcon(String s){
-    return s.replaceAll("✨", "");
-  }
+
   Future<Uint8List> readFileBytes(String path) async {
     ByteData fileData = await rootBundle.load(path);
     Uint8List fileUnit8List = fileData.buffer.asUint8List(fileData.offsetInBytes, fileData.lengthInBytes);

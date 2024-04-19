@@ -163,5 +163,7 @@ class PrinterHelper{
   static String leftAlign({required String data, required int rowsLength}){
     return '$data${getSpaces(rowsLength - data.length)}';
   }
-
+  static String removeSpecialIcon(String s){
+    return s.replaceAll("✨", "");
+  }
 }
