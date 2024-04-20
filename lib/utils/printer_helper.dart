@@ -8,9 +8,7 @@ class PrinterHelper{
   static const String lines = '--------------------------------------------------------';
   static const PosStyles posStylesDefault = PosStyles(bold:true);
   static String getSpaces(int n){
-    if(n < 1)
-      return "";
-    return spaceList.substring(0,n);
+      return ' '* (n-1);
   }
 
   static List<String> splitTextToFitRow({required String text, required Roll roll, required bool fillRow}) {
