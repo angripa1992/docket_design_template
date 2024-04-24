@@ -1,3 +1,5 @@
+import 'package:docket_design_template/extensions.dart';
+import 'package:docket_design_template/string_keys.dart';
 import 'package:docket_design_template/utils/price_utils.dart';
 import 'package:docket_design_template/utils/printer_configuration.dart';
 import 'package:esc_pos_utils/esc_pos_utils.dart';
@@ -99,7 +101,7 @@ class PrinterHelper{
     return bytes;
   }
 
-  static List<int> itemToBytes({required Generator generator,required Roll roll,required int quantity, required String itemName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign}){
+  static List<int> itemToBytes({required Generator generator,required Roll roll,required int quantity, required String itemName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign, String? orderNote}){
     List<int> bytes = [];
     String amt = PriceUtil.formatPrice(name:currency,currencySymbol: currencySymbol, price:num.parse(price) * quantity);
     int priceLength = amt.length;
@@ -124,13 +126,14 @@ class PrinterHelper{
     for (var element in str) {
       bytes += generator.text(leftAlign(data: '${getSpaces(qtyLength)}$element', rowsLength: length), styles: const PosStyles.defaults(bold: true));
     }
-
+    if(orderNote != null && orderNote.isNotEmpty){
+      bytes += PrinterHelper.rowBytes(data: '${StringKeys.note.tr()}: $orderNote', generator: generator, posStyles: const PosStyles.defaults(), roll: roll);
+    }
     return bytes;
   }
 
   static List<int> modifierToBytes({required Generator generator,required Roll roll,required int quantity, required String modifierName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign}){
     List<int> bytes = [];
-
     String amt = PriceUtil.formatPrice(name:currency,currencySymbol: currencySymbol, price:num.parse(price) * quantity);
     int priceLength = amt.length;
     String qty = '  ${quantity}x ';
