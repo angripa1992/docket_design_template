@@ -258,10 +258,10 @@ class CommonDesignTemplate {
     //footer
     bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(align: PosAlign.center));
 
-    Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
-    final decodedImage = im.decodeImage(imageBytesFromAsset);
-
-    bytes += generator.imageRaster(decodedImage!);
+    // Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
+    // final decodedImage = im.decodeImage(imageBytesFromAsset);
+    //
+    // bytes += generator.imageRaster(decodedImage!);
 
     bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
     bytes += generator.feed(2);
