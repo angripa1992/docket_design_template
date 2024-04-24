@@ -134,7 +134,9 @@ class CommonDesignTemplate {
             price: element.unitPrice,
             currency: order.currency,
             currencySymbol: order.currencySymbol,
-            customerCopy: isConsumerCopy);
+            customerCopy: isConsumerCopy,
+            orderNote: element.comment,
+        );
         if (element.modifierGroups.isNotEmpty) {
           for (var el in element.modifierGroups) {
             bytes += PrinterHelper.rowBytes(generator: generator, roll: roll, data: '  ${el.name}', posStyles: const PosStyles.defaults());
