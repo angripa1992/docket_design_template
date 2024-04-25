@@ -101,7 +101,8 @@ class PrinterHelper{
     return bytes;
   }
 
-  static List<int> itemToBytes({required Generator generator,required Roll roll,required int quantity, required String itemName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign, String? orderNote}){
+  static List<int> itemToBytes({required Generator generator,required Roll roll,required int quantity, required String itemName,required String price,required String currency,required String currencySymbol,required bool customerCopy,  PosAlign? posAlign, required String orderNote}){
+
     List<int> bytes = [];
     String amt = PriceUtil.formatPrice(name:currency,currencySymbol: currencySymbol, price:num.parse(price) * quantity);
     int priceLength = amt.length;
@@ -109,11 +110,17 @@ class PrinterHelper{
     int qtyLength = qty.length;
     int length = roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value;
     int spaceInLength = customerCopy ? length - priceLength - itemName.length - qtyLength : length - itemName.length - qtyLength;
-
     String firstItem;
     if(spaceInLength > 0){
       firstItem = customerCopy ? qty + itemName + getSpaces(spaceInLength) + amt : qty + itemName;
       bytes += generator.text(leftAlign(data: firstItem, rowsLength: length), styles: const PosStyles.defaults(bold: true));
+      if(orderNote.isNotEmpty){
+        bytes += rowBytes(
+            data: '${StringKeys.note.tr()}: $orderNote',
+            generator: generator,
+            posStyles: const PosStyles.defaults(),
+            roll: roll);
+      }
       return bytes;
     }
     int totalFirstCharsPrinter = itemName.length + spaceInLength - 1;
@@ -126,8 +133,12 @@ class PrinterHelper{
     for (var element in str) {
       bytes += generator.text(leftAlign(data: '${getSpaces(qtyLength)}$element', rowsLength: length), styles: const PosStyles.defaults(bold: true));
     }
-    if(orderNote != null && orderNote.isNotEmpty){
-      bytes += PrinterHelper.rowBytes(data: '${StringKeys.note.tr()}: $orderNote', generator: generator, posStyles: const PosStyles.defaults(), roll: roll);
+    if(orderNote.isNotEmpty){
+      bytes += rowBytes(
+          data: '${StringKeys.note.tr()}: $orderNote',
+          generator: generator,
+          posStyles: const PosStyles.defaults(),
+          roll: roll);
     }
     return bytes;
   }
@@ -165,5 +176,19 @@ class PrinterHelper{
   }
   static String removeSpecialIcon(String s){
     return s.replaceAll("✨", "");
+  }
+  static String centerText(String text, int width) {
+    List<String> lines = text.split('\n');
+    List<String> centeredLines = lines.map((line) => _centerLine(line, width)).toList();
+    return centeredLines.join('\n');
+  }
+
+  static String _centerLine(String line, int width) {
+    if (line.length >= width) {
+      return line; // Line is longer than the width, cannot center-align
+    }
+
+    int padding = ((width - line.length) / 2).round();
+    return ' ' * padding + line + ' ' * padding;
   }
 }

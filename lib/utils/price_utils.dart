@@ -12,6 +12,9 @@ class PriceUtil{
     required String currencySymbol,
     required String name,
   }) {
+    if(price == 0) {
+      return "";
+    }
     if (name.toUpperCase() == 'IDR') {
       return NumberFormat.currency(locale: 'ID', symbol: currencySymbol,decimalDigits: 0).format(price);
     } else if (name.toUpperCase() == 'JPY') {

@@ -121,14 +121,8 @@ class CommonZReportTemplate {
     bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
 
     //footer
-    bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(align: PosAlign.center));
-
-    // Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
-    // final decodedImage = im.decodeImage(imageBytesFromAsset);
-    //
-    // bytes += generator.imageRaster(decodedImage!, align: PosAlign.center);
-
-    bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
+    bytes += generator.text(PrinterHelper.centerText(StringKeys.powered_by.tr(), roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value));
+    bytes += generator.text(PrinterHelper.centerText("klikit", roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value), styles: const PosStyles(bold: true));
     bytes += generator.feed(2);
     bytes += generator.cut();
     return bytes;

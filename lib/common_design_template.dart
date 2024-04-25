@@ -125,6 +125,7 @@ class CommonDesignTemplate {
       bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${carts.length} ${StringKeys.item.tr().toLowerCase()}${carts.length > 1 ? '(s)' : ''}', str2: _orderType(order));
       bytes += generator.text(PrinterHelper.getLine(roll), styles: const PosStyles.defaults());
       for (var element in carts) {
+        print("element.comment ${element.comment}");
         bytes += PrinterHelper.itemToBytes(
             generator: generator,
             roll: roll,
@@ -256,14 +257,8 @@ class CommonDesignTemplate {
     bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.internal_id.tr().toUpperCase()}:', str2: '#${order.id}');
     bytes += generator.text(PrinterHelper.getLine(roll));
     //footer
-    bytes += generator.text(StringKeys.powered_by.tr(), styles: const PosStyles(align: PosAlign.center));
-
-    // Uint8List imageBytesFromAsset = await readFileBytes("packages/docket_design_template/assets/images/app_logo.jpg");
-    // final decodedImage = im.decodeImage(imageBytesFromAsset);
-    //
-    // bytes += generator.imageRaster(decodedImage!);
-
-    bytes += generator.text('klikit', styles: const PosStyles(bold:true,align: PosAlign.center));
+    bytes += generator.text(PrinterHelper.centerText(StringKeys.powered_by.tr(), roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value));
+    bytes += generator.text(PrinterHelper.centerText("klikit", roll == Roll.mm58 ? PaperLength.max_mm58.value : PaperLength.max_mm80.value), styles: const PosStyles(bold: true));
     bytes += generator.feed(2);
     bytes += generator.cut();
 
