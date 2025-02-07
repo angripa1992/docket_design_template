@@ -73,7 +73,7 @@ class CommonDesignTemplate {
       bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.note.tr()}:', str2: order.klikitComment);
     }
 
-    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: order.placedOn, str2: (order.providerId == ProviderID.KLIKIT) ? '#${order.id}' : '#${order.shortId}',posStyles: const PosStyles(bold: true));
+    bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: order.placedOn, str2: '#${order.shortId}',posStyles: const PosStyles(bold: true));
 
     if (order.status == OrderStatus.PLACED || order.status == OrderStatus.ACCEPTED || order.status == OrderStatus.READY) {
       bytes += PrinterHelper.columnBytes(generator: generator, roll: roll, str1: '${StringKeys.customer_name.tr()}:', str2: '${order.userFirstName} ${order.userLastName}');
